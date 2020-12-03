@@ -1,15 +1,14 @@
 #include <json-c/json.h>
 #include <string.h>
+#include <curl/curl.h>
 #include <stdio.h>
 
 #include "nl80211.h"
-#include "mozilla.h"
+#include "google.h"
 #include "wlocate.h"
 
-#define API_FORMAT_STR	"https://location.services.mozilla.com/v1/geolocate?key=%s"
+#define API_FORMAT_STR	"https://www.googleapis.com/geolocation/v1/geolocate?key=%s"
 
-
-char* mozilla_test_api_key = "test";
 
 static int build_submission_object(char **out, struct scan_results *results)
 {
@@ -30,6 +29,8 @@ static int build_submission_object(char **out, struct scan_results *results)
 		json_object_object_add(ap_obj, "signalStrength", json_object_new_int(result->signal));
 		json_object_array_add(ap_list, ap_obj);
 	}
+
+	json_object_object_add(root_obj, "considerIp", json_object_new_boolean(0));
 	json_object_object_add(root_obj, "wifiAccessPoints", ap_list);
 	c = json_object_to_json_string(root_obj);
 
@@ -53,20 +54,17 @@ static int json_response_parse(struct geolocation_result *result, char *response
 	result->latitude = json_object_get_double(jobj);
 	json_object_object_get_ex(location_obj, "lng", &jobj);
 	result->longitude = json_object_get_double(jobj);
-	json_object_object_get_ex(location_obj, "accuracy", &jobj);
+	json_object_object_get_ex(root_obj, "accuracy", &jobj);
 	result->accuracy = json_object_get_double(jobj);
 
 	json_object_put(root_obj);
 }
 
-int locate_mozilla(struct scan_results *results, struct geolocation_result *geolocation, char *api_key)
+int locate_google(struct scan_results *results, struct geolocation_result *geolocation, char *api_key)
 {
-	struct curl_output output = {};
 	char *request_obj_str;
+	struct curl_output output = {};
 	char *request_url;
-
-	if (api_key == NULL)
-		api_key = mozilla_test_api_key;
 
 	if (build_request_url(&request_url, API_FORMAT_STR, api_key))
 		return 1;
@@ -77,8 +75,10 @@ int locate_mozilla(struct scan_results *results, struct geolocation_result *geol
 
 	json_response_parse(geolocation, output.outbuf);
 
+	free(request_url);
 	free(output.outbuf);
 	free(request_obj_str);
 
 	return 0;
+
 }

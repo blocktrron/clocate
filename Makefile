@@ -1,2 +1,6 @@
+CC:=gcc
+CFLAGS:=$(shell pkg-config --cflags libnl-3.0) $(shell pkg-config --cflags json-c)
+LDFLAGS:=$(shell pkg-config --libs libnl-3.0) $(shell pkg-config --libs libnl-genl-3.0) $(shell pkg-config --libs json-c) $(shell pkg-config --libs libcurl)
+
 all:
-	gcc -g -I/usr/include/libnl3 -I/usr/include/json-c -lnl-3 -lnl-genl-3 -ljson-c -lcurl -o clocate main.c nl80211.c mozilla.c google.c provider.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o clocate main.c nl80211.c mozilla.c google.c provider.c

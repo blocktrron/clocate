@@ -2,6 +2,8 @@
 #ifndef __WLOCATE_H
 #define __WLOCATE_H
 
+#include <time.h>
+
 struct geolocation_result {
 	double latitude;
 	double longitude;

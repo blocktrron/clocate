@@ -27,6 +27,12 @@ struct scan_results {
 	struct scan_result *results;
 };
 
+struct if_results {
+	char *buf;
+	size_t count;
+};
+
 int perform_scan( struct scan_results *results, const char *ifname);
+int get_wireless_interfaces(struct if_results *results);
 
 #endif

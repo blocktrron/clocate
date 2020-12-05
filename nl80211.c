@@ -248,3 +248,70 @@ error:
 		fprintf(stderr, "%s: %d", __func__, ret);
 	return ret;
 }
+
+static int iface_list_result_cb(struct nl_msg *msg, void *arg) {
+	struct genlmsghdr *gnlh = nlmsg_data(nlmsg_hdr(msg));
+	struct nlattr *tb[NUM_NL80211_ATTR];
+	struct nlattr *bss[NUM_NL80211_ATTR];
+	struct if_results *results = arg;
+	char *outbuf;
+	char *buf;
+
+	nla_parse(tb, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0), NULL);
+	if (!tb[NL80211_ATTR_IFNAME])
+		return NL_SKIP;
+
+	results->count++;
+	results->buf = realloc(results->buf, results->count * (IF_NAMESIZE * sizeof(char)));
+	if (results->buf < 0)
+		return -ENOMEM;
+
+	outbuf = &results->buf[(results->count - 1) * IF_NAMESIZE];
+	memset(outbuf, 0, IF_NAMESIZE * sizeof(char));
+
+
+	buf = nla_get_string(tb[NL80211_ATTR_IFNAME]);
+	memcpy(outbuf, buf, strnlen(buf, IF_NAMESIZE) * sizeof(char));
+
+	return NL_SKIP;
+}
+
+int get_wireless_interfaces(struct if_results *results)
+{
+	struct nl_sock *socket = nl_socket_alloc();
+	int driver_id;
+	int ret;
+
+	genl_connect(socket);
+
+	driver_id = genl_ctrl_resolve(socket, "nl80211");
+	if (driver_id < 0) {
+		ret = -ENOSYS;
+		goto error;
+	}
+
+	struct nl_msg *msg;
+
+	msg = nlmsg_alloc();
+	genlmsg_put(msg, 0, 0, driver_id, 0, NLM_F_DUMP, NL80211_CMD_GET_INTERFACE, 0);
+
+	nl_socket_modify_cb(socket, NL_CB_VALID, NL_CB_CUSTOM, iface_list_result_cb, results);
+
+	ret = nl_send_auto(socket, msg);
+	if (ret < 0)
+		goto error;
+
+	ret = nl_recvmsgs_default(socket);
+	if (ret < 0)
+		goto error;
+
+error:
+	if (msg)
+		nlmsg_free(msg);
+
+	if (ret < 0) {
+		fprintf(stderr, "%s: %d", __func__, ret);
+		return ret;
+	}
+	return 0;
+}

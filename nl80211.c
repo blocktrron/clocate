@@ -1,3 +1,5 @@
+#include <sys/socket.h>
+
 #include <linux/nl80211.h>
 #include <netlink/genl/genl.h>
 #include <netlink/genl/ctrl.h>

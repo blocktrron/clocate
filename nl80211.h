@@ -1,8 +1,20 @@
 #ifndef __WLOCATE_NL80211_H
 #define __WLOCATE_NL80211_H
 
+#include <netlink/genl/ctrl.h>
+
 #define 	MAC2STR(a)   (a)[0], (a)[1], (a)[2], (a)[3], (a)[4], (a)[5]
 #define 	MACSTR   "%02x:%02x:%02x:%02x:%02x:%02x"
+
+#ifdef LIBNL_TINY
+
+#define NL_AUTO_PORT	0
+
+static inline int nl_send_auto(struct nl_sock *sk, struct nl_msg *msg)
+{
+	return nl_send_auto_complete(sk, msg);
+}
+#endif
 
 struct scan_result {
 	unsigned char bssid[6];

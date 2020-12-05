@@ -3,7 +3,7 @@ CFLAGS:=$(shell pkg-config --cflags json-c)
 LDFLAGS:=$(shell pkg-config --libs json-c) $(shell pkg-config --libs libcurl)
 
 ifdef LIBNL_TINY
-CFLAGS += $(shell pkg-config --cflags libnl-tiny)
+CFLAGS += $(shell pkg-config --cflags libnl-tiny) -DLIBNL_TINY -D_GNU_SOURCE
 LDFLAGS += $(shell pkg-config --libs libnl-tiny)
 endif
 

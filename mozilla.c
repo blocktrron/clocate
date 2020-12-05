@@ -53,7 +53,7 @@ static int json_response_parse(struct geolocation_result *result, char *response
 	result->latitude = json_object_get_double(jobj);
 	json_object_object_get_ex(location_obj, "lng", &jobj);
 	result->longitude = json_object_get_double(jobj);
-	json_object_object_get_ex(location_obj, "accuracy", &jobj);
+	json_object_object_get_ex(root_obj, "accuracy", &jobj);
 	result->accuracy = json_object_get_double(jobj);
 
 	json_object_put(root_obj);

@@ -62,7 +62,7 @@ static int do_scan_trigger(struct nl_sock *socket, int if_index, int driver_id) 
 	struct nl_msg *msg;
 	struct nl_cb *cb;
 	struct nl_msg *ssids_to_scan;
-	int err;
+	int err = 0;
 	int ret;
 	int mcid;
 	int result;
@@ -112,14 +112,13 @@ static int do_scan_trigger(struct nl_sock *socket, int if_index, int driver_id) 
 	while (!(result & RESULT_DONE) && err == 0)
 		nl_recvmsgs(socket, cb);
 	
-	if (err)
-		return err;
-
-	if (result & RESULT_ABORTED) {
-		return 1;
+	if (err) {
+		ret = err;
+		goto error_free;
 	}
 
-	return 0;
+	if (result & RESULT_ABORTED)
+		ret = -ECANCELED;
 
 error_free:
 	nl_socket_drop_membership(socket, mcid);
@@ -129,14 +128,15 @@ error_free:
 
 	if (cb)
 		nl_cb_put(cb);
-	if (msg)
-		nlmsg_free(msg);
 	if (ssids_to_scan)
 		nlmsg_free(ssids_to_scan);
 error:
-	if (ret)
+	if (ret < 0) {
 		fprintf(stderr, "%s: %d", __func__, ret);
-	return ret;
+		return ret;
+	}
+
+	return 0;
 }
 
 static char *find_ie(char *ies, int ies_len, char tag)

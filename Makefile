@@ -1,5 +1,5 @@
 CC:=gcc
-CFLAGS:=$(shell pkg-config --cflags libnl-3.0) $(shell pkg-config --cflags json-c)
+CFLAGS:=$(shell pkg-config --cflags json-c)
 LDFLAGS:=$(shell pkg-config --libs json-c) $(shell pkg-config --libs libcurl)
 
 ifdef LIBNL_TINY

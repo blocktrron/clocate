@@ -27,6 +27,7 @@ int main(int argc, char *argv[]) {
 	char *interface;
 	char *provider;
 	char *apikey;
+	int ret;
 
 	get_wireless_interfaces(&ifresults);
 
@@ -53,10 +54,12 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < ifresults.count; i++)
 		perform_scan(&results, &ifresults.buf[i * IF_NAMESIZE]);
 
-	perform_locate(&results, &geolocation_result, request_url);
+	if (ret = perform_locate(&results, &geolocation_result, request_url))
+		goto out;
 
 	printf("%f, %f %f\n", geolocation_result.latitude, geolocation_result.longitude, geolocation_result.accuracy);
 
+out:
 	free(request_url);
 
 	return 0;

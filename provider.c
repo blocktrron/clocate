@@ -106,9 +106,10 @@ out:
 		fprintf(stderr, "curl_easy_perform() failed: %s\n",
 			curl_easy_strerror(res));
 		ret = -EINVAL;
-	} else if (http_code != 200)
+	} else if (http_code != 200) {
 		fprintf(stderr, "%s: %d\n", __func__, http_code);
 		ret = -EINVAL;
+	}
 
 	if (curl)
 		curl_easy_cleanup(curl);
@@ -141,7 +142,6 @@ int perform_locate(struct scan_results *results, struct geolocation_result *geol
 
 	if (ret = geolocation_request(geolocation, &output, request_url, request_obj_str))
 		goto out;
-		
 
 	json_response_parse(geolocation, output.outbuf);
 

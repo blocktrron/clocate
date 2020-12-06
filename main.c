@@ -28,6 +28,7 @@ static int start_geolocation(struct locator_config *configuration, struct geoloc
 	struct scan_results net_results = {};
 	char *request_url;
 	int ret = 0;
+	char *iface;
 
 	request_url = configuration->provider->get_url(configuration->provider,
 						       configuration->provider_url,
@@ -36,9 +37,15 @@ static int start_geolocation(struct locator_config *configuration, struct geoloc
 		return -EINVAL;
 
 	for (int i = 0; i < configuration->interfaces.count; i++) {
-		ret = perform_scan(&net_results, &configuration->interfaces.buf[i * IF_NAMESIZE]);
+		iface = &configuration->interfaces.buf[i * IF_NAMESIZE];
+		ret = perform_scan(&net_results, iface);
 		if (ret)
-			goto out;
+			fprintf(stderr, "Scan failed on interface %s\n", iface);
+	}
+
+	if (net_results.result_count == 0) {
+		fprintf(stderr, "No networks found\n");
+		goto out;
 	}
 
 	ret = perform_locate(&net_results, geo_result, request_url);

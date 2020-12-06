@@ -51,13 +51,6 @@ out:
 int main(int argc, char *argv[]) {
 	struct geolocation_result geolocation_result = {};
 	struct locator_config configuration = {};
-	struct geolocation_provider *geo_provider;
-	struct scan_results results = {};
-	struct if_results ifresults = {};
-	char *request_url;
-	char *interface;
-	char *provider;
-	char *apikey;
 	int ret;
 
 	get_wireless_interfaces(&configuration.interfaces);
@@ -66,8 +59,6 @@ int main(int argc, char *argv[]) {
 		usage(argv[0]);
 		exit(1);
 	}
-
-	provider = argv[1];
 
 	configuration.provider = get_geolocation_provider(argv[1]);
 

@@ -7,13 +7,20 @@
 #include "wlocate.h"
 
 
-static void usage(char *p) {
-	printf("Usage: %s provider [apikey]\n", p);
-	printf("Available providers: mozilla google\n");
+static void usage(char *path) {
+	struct geolocation_provider *providers, *p;
+	printf("Usage: %s provider [apikey]\n", path);
+
+	providers = get_geolocation_providers();
+	printf("Available providers:\n");
+	for (p = providers; p->name; p++)
+		printf(" %s\n", p->name);
+	
 }
 
 int main(int argc, char *argv[]) {
 	struct geolocation_result geolocation_result = {};
+	struct geolocation_provider *geo_provider;
 	struct scan_results results = {};
 	struct if_results ifresults = {};
 	char *request_url;
@@ -30,25 +37,21 @@ int main(int argc, char *argv[]) {
 
 	provider = argv[1];
 
-	if (argc < 3 && !strcmp("mozilla", provider)) {
-		apikey = "test";
-	} else if (argc < 3) {
+	geo_provider = get_geolocation_provider(argv[1]);
+
+	if (!geo_provider || argc < 3 && geo_provider->api_key && !geo_provider->default_api_key) {
 		usage(argv[0]);
 		exit(1);
 	} else {
 		apikey = argv[2];
 	}
 
+	request_url = geo_provider->get_url(geo_provider, NULL, apikey);
+	if (!request_url)
+		return 1;
+
 	for (int i = 0; i < ifresults.count; i++)
 		perform_scan(&results, &ifresults.buf[i * IF_NAMESIZE]);
-
-	if (!strcmp("mozilla", provider)) {
-		if (build_request_url(&request_url, MOZILLA_API_PATH, apikey))
-			return 1;
-	} else {
-		if (build_request_url(&request_url, GOOGLE_API_PATH, apikey))
-			return 1;
-	}
 
 	perform_locate(&results, &geolocation_result, request_url);
 

@@ -139,3 +139,52 @@ int perform_locate(struct scan_results *results, struct geolocation_result *geol
 
 	return 0;
 }
+
+char *provider_get_url(struct geolocation_provider *provider, char *url, char *api_key)
+{
+	char *out = NULL;
+
+	if (url) {
+		out = calloc(strlen(url) + 1, sizeof(char));
+		memcpy(out, url, strlen(url) * sizeof(char));
+	} else if (!provider->api_key) {
+		if (!provider->url)
+			return NULL;
+
+		out = calloc(strlen(provider->url) + 1, sizeof(char));
+		memcpy(out, provider->url, strlen(provider->url) * sizeof(char));
+	} else {
+		if (!api_key && !provider->default_api_key)
+			return NULL;
+
+		if (!api_key)
+			api_key = provider->default_api_key;
+
+		build_request_url(&out, provider->url, api_key);
+	}
+
+	return out;
+}
+
+struct geolocation_provider providers[] = {
+	{.name = "mozilla", .url = MOZILLA_API_PATH, .get_url = provider_get_url, .api_key = true, .default_api_key = "test"},
+	{.name = "google", .url = GOOGLE_API_PATH, .get_url = provider_get_url, .api_key = true, .default_api_key = NULL},
+	{},
+};
+
+struct geolocation_provider* get_geolocation_providers()
+{
+	return providers;
+}
+
+struct geolocation_provider* get_geolocation_provider(char *name)
+{
+	struct geolocation_provider *pv;
+	
+	for (pv = &providers[0]; pv->name; pv++) {
+		if (!strcmp(pv->name, name))
+			return pv;
+	}
+
+	return NULL;
+}

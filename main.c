@@ -3,6 +3,10 @@
 #include <netlink/genl/genl.h>
 #include <net/if.h>
 #include <errno.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include "nl80211.h"
 #include "clocate.h"
@@ -10,7 +14,7 @@
 
 static void usage(char *path) {
 	struct geolocation_provider *providers, *p;
-	printf("Usage: %s provider [apikey]\n", path);
+	printf("Usage: %s [-h] [-p provider] [-k apikey] [-i interface]\n", path);
 
 	providers = get_geolocation_providers();
 	printf("Available providers:\n");
@@ -52,22 +56,47 @@ int main(int argc, char *argv[]) {
 	struct geolocation_result geolocation_result = {};
 	struct locator_config configuration = {};
 	int ret;
+	char c;
 
-	get_wireless_interfaces(&configuration.interfaces);
+	while ((c = getopt (argc, argv, "hi:k:p:")) != -1) {
+		switch(c) {
+			case 'h':
+				usage(argv[0]);
+				exit(0);
+			case 'i':
+				if(strlen(optarg) > IF_NAMESIZE - 1) {
+					usage(argv[0]);
+					exit(1);
+				}
 
-	if (argc < 2) {
-		usage(argv[0]);
-		exit(1);
+				configuration.interfaces.count = 1;
+				configuration.interfaces.buf = malloc(IF_NAMESIZE * sizeof(char));
+				snprintf(configuration.interfaces.buf, IF_NAMESIZE, "%s", optarg);
+				break;
+			case 'p':
+				configuration.provider = get_geolocation_provider(optarg);
+				break;
+			case 'k':
+				configuration.provider_api_key = optarg;
+				break;
+		}
 	}
 
-	configuration.provider = get_geolocation_provider(argv[1]);
+	if (!configuration.interfaces.buf)
+		get_wireless_interfaces(&configuration.interfaces);
 
-	if (!configuration.provider ||
-	    argc < 3 && configuration.provider->api_key && !configuration.provider->default_api_key) {
+	if (configuration.interfaces.count == 0) {
+		fprintf(stderr, "No wireless interfaces available\n");
+		goto out;
+	}
+
+	if (!configuration.provider)
+		configuration.provider = get_geolocation_provider("mozilla");
+
+	if (configuration.provider->api_key && !configuration.provider->default_api_key &&
+	    !configuration.provider_api_key) {
 		usage(argv[0]);
 		exit(1);
-	} else {
-		configuration.provider_api_key = argv[2];
 	}
 
 	if (ret = start_geolocation(&configuration, &geolocation_result))

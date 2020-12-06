@@ -4,8 +4,6 @@
 #include <net/if.h>
 
 #include "nl80211.h"
-#include "google.h"
-#include "mozilla.h"
 #include "wlocate.h"
 
 
@@ -18,6 +16,7 @@ int main(int argc, char *argv[]) {
 	struct geolocation_result geolocation_result = {};
 	struct scan_results results = {};
 	struct if_results ifresults = {};
+	char *request_url;
 	char *interface;
 	char *provider;
 	char *apikey;
@@ -43,12 +42,19 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < ifresults.count; i++)
 		perform_scan(&results, &ifresults.buf[i * IF_NAMESIZE]);
 
-	if (!strcmp("mozilla", provider))
-		locate_mozilla(&results, &geolocation_result, apikey);
-	else
-		locate_google(&results, &geolocation_result, apikey);
+	if (!strcmp("mozilla", provider)) {
+		if (build_request_url(&request_url, MOZILLA_API_PATH, apikey))
+			return 1;
+	} else {
+		if (build_request_url(&request_url, GOOGLE_API_PATH, apikey))
+			return 1;
+	}
+
+	perform_locate(&results, &geolocation_result, request_url);
 
 	printf("%f, %f %f\n", geolocation_result.latitude, geolocation_result.longitude, geolocation_result.accuracy);
+
+	free(request_url);
 
 	return 0;
 }

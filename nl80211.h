@@ -3,8 +3,7 @@
 
 #include <netlink/genl/ctrl.h>
 
-#define 	MAC2STR(a)   (a)[0], (a)[1], (a)[2], (a)[3], (a)[4], (a)[5]
-#define 	MACSTR   "%02x:%02x:%02x:%02x:%02x:%02x"
+#include "wlocate.h"
 
 #ifdef LIBNL_TINY
 
@@ -15,17 +14,6 @@ static inline int nl_send_auto(struct nl_sock *sk, struct nl_msg *msg)
 	return nl_send_auto_complete(sk, msg);
 }
 #endif
-
-struct scan_result {
-	unsigned char bssid[6];
-	char ssid[33];
-	int signal;
-};
-
-struct scan_results {
-	int result_count;
-	struct scan_result *results;
-};
 
 struct if_results {
 	char *buf;

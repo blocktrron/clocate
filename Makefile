@@ -13,4 +13,4 @@ LDFLAGS += $(shell pkg-config --libs libnl-3.0) $(shell pkg-config --libs libnl-
 endif
 
 all:
-	$(CC) $(CFLAGS) $(LDFLAGS) -o clocate main.c nl80211.c mozilla.c google.c provider.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o clocate main.c nl80211.c provider.c

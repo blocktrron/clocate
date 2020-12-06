@@ -1,9 +1,9 @@
-#ifndef __WLOCATE_NL80211_H
-#define __WLOCATE_NL80211_H
+#ifndef __CLOCATE_NL80211_H
+#define __CLOCATE_NL80211_H
 
 #include <netlink/genl/ctrl.h>
 
-#include "wlocate.h"
+#include "clocate.h"
 
 #ifdef LIBNL_TINY
 

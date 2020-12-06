@@ -4,7 +4,7 @@
 #include <net/if.h>
 
 #include "nl80211.h"
-#include "wlocate.h"
+#include "clocate.h"
 
 
 static void usage(char *path) {

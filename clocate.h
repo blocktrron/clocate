@@ -1,6 +1,6 @@
 
-#ifndef __WLOCATE_H
-#define __WLOCATE_H
+#ifndef __CLOCATE_H
+#define __CLOCATE_H
 
 #include <time.h>
 #include <stdbool.h>

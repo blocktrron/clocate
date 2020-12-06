@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include "wlocate.h"
+#include "clocate.h"
 
 static size_t writefunc(void *ptr, size_t size, size_t nmemb, struct curl_output *s)
 {

@@ -125,7 +125,7 @@ int build_request_url(char **output, char *format_str, char *api_key)
 
 	*output = calloc(output_len, sizeof(char));
 	if (!output)
-		return 1;
+		return -ENOMEM;
 
 	snprintf(*output, output_len, format_str, api_key);
 	return 0;

@@ -76,5 +76,7 @@ int main(int argc, char *argv[]) {
 	printf("%f, %f %f\n", geolocation_result.latitude, geolocation_result.longitude, geolocation_result.accuracy);
 
 out:
+	if (configuration.interfaces.buf)
+		free(configuration.interfaces.buf);
 	return ret;
 }

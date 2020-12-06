@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 	provider = argv[1];
 
 	if (argc < 3 && !strcmp("mozilla", provider)) {
-		apikey = NULL;
+		apikey = "test";
 	} else if (argc < 3) {
 		usage(argv[0]);
 		exit(1);

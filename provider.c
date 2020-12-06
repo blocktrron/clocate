@@ -3,6 +3,7 @@
 #include <json-c/json.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "wlocate.h"
 
@@ -79,6 +80,7 @@ int geolocation_request(struct geolocation_result *result, struct curl_output *o
 	CURLcode res = 0;
 	int ret = 0;
 	CURL *curl;
+	long http_code = 0;
 
 	curl_global_init(CURL_GLOBAL_ALL);
 
@@ -97,13 +99,19 @@ int geolocation_request(struct geolocation_result *result, struct curl_output *o
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, output);
 
 	res = curl_easy_perform(curl);
-
-	curl_easy_cleanup(curl);
+	curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &http_code);
 
 out:
-	if (res && res != CURLE_OK)
+	if (res && res != CURLE_OK) {
 		fprintf(stderr, "curl_easy_perform() failed: %s\n",
 			curl_easy_strerror(res));
+		ret = -EINVAL;
+	} else if (http_code != 200)
+		fprintf(stderr, "%s: %d\n", __func__, http_code);
+		ret = -EINVAL;
+
+	if (curl)
+		curl_easy_cleanup(curl);
 	curl_global_cleanup();
 	return ret;
 }
@@ -127,17 +135,21 @@ int perform_locate(struct scan_results *results, struct geolocation_result *geol
 {
 	char *request_obj_str;
 	struct curl_output output = {};
+	int ret = 0;
 
 	build_submission_object(&request_obj_str, results);
 
-	geolocation_request(geolocation, &output, request_url, request_obj_str);
+	if (ret = geolocation_request(geolocation, &output, request_url, request_obj_str))
+		goto out;
+		
 
 	json_response_parse(geolocation, output.outbuf);
 
+out:
 	free(output.outbuf);
 	free(request_obj_str);
 
-	return 0;
+	return ret;
 }
 
 char *provider_get_url(struct geolocation_provider *provider, char *url, char *api_key)

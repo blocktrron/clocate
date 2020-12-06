@@ -45,6 +45,19 @@ struct curl_output {
 	size_t len;
 };
 
+struct if_results {
+	char *buf;
+	size_t count;
+};
+
+struct locator_config {
+	struct if_results interfaces;
+
+	struct geolocation_provider *provider;
+	char *provider_url;
+	char *provider_api_key;
+};
+
 int geolocation_request(struct geolocation_result *result, struct curl_output *output,
 			char *url, char *post_data);
 

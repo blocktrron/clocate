@@ -6,22 +6,7 @@
 #include <errno.h>
 
 #include "clocate.h"
-
-static size_t writefunc(void *ptr, size_t size, size_t nmemb, struct curl_output *s)
-{
-	size_t receiving_size = size * nmemb;
-	size_t new_len = s->len + receiving_size;
-
-	s->outbuf = realloc(s->outbuf, new_len + 1);
-	if (s->outbuf == NULL)
-		exit(1);
-
-	memcpy(s->outbuf + s->len, ptr, receiving_size);
-	s->outbuf[new_len] = '\0';
-	s->len = new_len;
-
-	return receiving_size;
-}
+#include "transport.h"
 
 static int build_submission_object(char **out, struct scan_results *results)
 {
@@ -73,50 +58,6 @@ static int json_response_parse(struct geolocation_result *result, char *response
 	json_object_put(root_obj);
 }
 
-int geolocation_request(struct geolocation_result *result, struct curl_output *output,
-			char *url, char *post_data)
-{
-	struct curl_slist *list = NULL;
-	CURLcode res = 0;
-	int ret = 0;
-	CURL *curl;
-	long http_code = 0;
-
-	curl_global_init(CURL_GLOBAL_ALL);
-
-	curl = curl_easy_init();
-	if (!curl) {
-		ret = -1;
-		goto out;
-	}
-
-	curl_easy_setopt(curl, CURLOPT_URL, url);
-	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
-
-	list = curl_slist_append(list, "Content-Type: application/json");
-	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, output);
-
-	res = curl_easy_perform(curl);
-	curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &http_code);
-
-out:
-	if (res && res != CURLE_OK) {
-		fprintf(stderr, "curl_easy_perform() failed: %s\n",
-			curl_easy_strerror(res));
-		ret = -EINVAL;
-	} else if (http_code != 200) {
-		fprintf(stderr, "%s: %d\n", __func__, http_code);
-		ret = -EINVAL;
-	}
-
-	if (curl)
-		curl_easy_cleanup(curl);
-	curl_global_cleanup();
-	return ret;
-}
-
 int build_request_url(char **output, char *format_str, char *api_key)
 {
 	size_t format_str_len = strlen(format_str);
@@ -135,12 +76,12 @@ int perform_locate(struct scan_results *results, struct geolocation_result *geol
 		   char *request_url)
 {
 	char *request_obj_str;
-	struct curl_output output = {};
+	struct transport_result output = {};
 	int ret = 0;
 
 	build_submission_object(&request_obj_str, results);
 
-	if (ret = geolocation_request(geolocation, &output, request_url, request_obj_str))
+	if (ret = get_file(&output, request_url, request_obj_str))
 		goto out;
 
 	json_response_parse(geolocation, output.outbuf);

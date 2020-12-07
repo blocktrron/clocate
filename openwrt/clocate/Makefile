@@ -17,15 +17,20 @@ endef
 define Package/clocate
   SECTION:=net
   CATEGORY:=Network
-  DEPENDS:=+libcurl +libnl-tiny +libjson-c
+  DEPENDS:=+libcurl +libnl-tiny +libjson-c +libubox +libubus +libblobmsg-json
   TITLE:=Location
 endef
 
 define Package/clocate/install
-	$(INSTALL_DIR) $(1)/sbin
-	$(CP) $(PKG_BUILD_DIR)/clocate $(1)/sbin/clocate
+	$(INSTALL_DIR) $(1)/sbin $(1)/etc/config $(1)/etc/init.d
+
+	$(CP) ./files/clocate.config $(1)/etc/config/clocate
+	$(INSTALL_BIN) ./files/clocate.init $(1)/etc/init.d/clocate
+
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/clocate $(1)/sbin/clocate
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/clocated $(1)/sbin/clocated
 endef
 
-MAKE_FLAGS += LIBNL_TINY=1
+MAKE_FLAGS += LIBNL_TINY=1 DAEMON=1
 
 $(eval $(call BuildPackage,clocate))

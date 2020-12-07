@@ -62,4 +62,6 @@ struct geolocation_provider* get_geolocation_providers();
 
 struct geolocation_provider* get_geolocation_provider(char *name);
 
+int start_geolocation(struct locator_config *configuration, struct geolocation_result *geo_result);
+
 #endif

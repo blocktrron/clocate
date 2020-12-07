@@ -1,10 +1,12 @@
 #include <string.h>
 #include <curl/curl.h>
 #include <json-c/json.h>
+#include <net/if.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 
+#include "nl80211.h"
 #include "clocate.h"
 #include "transport.h"
 
@@ -140,4 +142,40 @@ struct geolocation_provider* get_geolocation_provider(char *name)
 	}
 
 	return NULL;
+}
+
+int start_geolocation(struct locator_config *configuration, struct geolocation_result *geo_result)
+{
+	struct scan_results net_results = {};
+	char *request_url;
+	int ret = 0;
+	char *iface;
+
+	request_url = configuration->provider->get_url(configuration->provider,
+						       configuration->provider_url,
+						       configuration->provider_api_key);
+	if (!request_url)
+		return -EINVAL;
+
+	for (int i = 0; i < configuration->interfaces.count; i++) {
+		iface = &configuration->interfaces.buf[i * IF_NAMESIZE];
+		ret = perform_scan(&net_results, iface);
+		if (ret)
+			fprintf(stderr, "Scan failed on interface %s\n", iface);
+	}
+
+	if (net_results.result_count == 0) {
+		fprintf(stderr, "No networks found\n");
+		goto out;
+	}
+
+	ret = perform_locate(&net_results, geo_result, request_url);
+out:
+	if (request_url)
+		free(request_url);
+
+	if (net_results.results)
+		free(net_results.results);
+
+	return ret;
 }

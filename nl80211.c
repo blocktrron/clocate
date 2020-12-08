@@ -65,7 +65,7 @@ static int do_scan_trigger(struct nl_sock *socket, int if_index, int driver_id) 
 	int err = 0;
 	int ret;
 	int mcid;
-	int result;
+	int result = 0;
 
 	mcid = genl_ctrl_resolve_grp(socket, "nl80211", "scan");
 	if (mcid < 0) {
@@ -246,6 +246,8 @@ int perform_scan( struct scan_results *results, const char *ifname)
 error:
 	if (ret)
 		fprintf(stderr, "%s: %d", __func__, ret);
+
+	nl_socket_free(socket);
 	return ret;
 }
 
@@ -313,5 +315,8 @@ error:
 		fprintf(stderr, "%s: %d", __func__, ret);
 		return ret;
 	}
+
+	nl_socket_free(socket);
+
 	return 0;
 }

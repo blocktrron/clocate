@@ -61,6 +61,10 @@ out:
 
 	if (curl)
 		curl_easy_cleanup(curl);
+
+	if (list)
+		curl_slist_free_all(list);
+
 	curl_global_cleanup();
 	return ret;
 }

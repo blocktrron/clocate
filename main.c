@@ -16,7 +16,7 @@ static void usage(char *path) {
 	struct geolocation_provider *providers, *p;
 	printf("Usage: %s [-h] [-p provider] [-k apikey] [-i interface]\n", path);
 
-	providers = get_geolocation_providers();
+	providers = provider_get_geolocation_providers();
 	printf("Available providers:\n");
 	for (p = providers; p->name; p++)
 		printf(" %s\n", p->name);
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 				snprintf(configuration.interfaces.buf, IF_NAMESIZE, "%s", optarg);
 				break;
 			case 'p':
-				configuration.provider = get_geolocation_provider(optarg);
+				configuration.provider = provider_get_geolocation_provider(optarg);
 				break;
 			case 'k':
 				configuration.provider_api_key = optarg;
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (!configuration.provider)
-		configuration.provider = get_geolocation_provider("mozilla");
+		configuration.provider = provider_get_geolocation_provider("mozilla");
 
 	if (configuration.provider->api_key && !configuration.provider->default_api_key &&
 	    !configuration.provider_api_key) {
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	if (ret = start_geolocation(&configuration, &geolocation_result))
+	if (ret = provider_start_geolocation(&configuration, &geolocation_result))
 		goto out;
 
 	printf("%f, %f %f\n", geolocation_result.latitude, geolocation_result.longitude, geolocation_result.accuracy);

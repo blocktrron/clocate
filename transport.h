@@ -6,6 +6,6 @@ struct transport_result {
 	size_t len;
 };
 
-int get_file(struct transport_result *output, char *url, char *post_data);
+int transport_get_file(struct transport_result *output, char *url, char *post_data);
 
 #endif

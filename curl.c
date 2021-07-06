@@ -6,7 +6,7 @@
 
 #include "transport.h"
 
-static size_t writefunc(void *ptr, size_t size, size_t nmemb, struct transport_result *s)
+static size_t curl_writefunc(void *ptr, size_t size, size_t nmemb, struct transport_result *s)
 {
 	size_t receiving_size = size * nmemb;
 	size_t new_len = s->len + receiving_size;
@@ -22,7 +22,7 @@ static size_t writefunc(void *ptr, size_t size, size_t nmemb, struct transport_r
 	return receiving_size;
 }
 
-int get_file(struct transport_result *output, char *url, char *post_data)
+int transport_get_file(struct transport_result *output, char *url, char *post_data)
 {
 	struct curl_slist *list = NULL;
 	CURLcode res = 0;
@@ -43,7 +43,7 @@ int get_file(struct transport_result *output, char *url, char *post_data)
 
 	list = curl_slist_append(list, "Content-Type: application/json");
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_writefunc);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, output);
 
 	res = curl_easy_perform(curl);

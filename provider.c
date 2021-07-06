@@ -10,7 +10,7 @@
 #include "clocate.h"
 #include "transport.h"
 
-static int build_submission_object(char **out, struct scan_results *results)
+static int provider_build_submission_object(char **out, struct scan_results *results)
 {
 	struct json_object *root_obj, *ap_list;
 	size_t bufsize;
@@ -43,7 +43,7 @@ static int build_submission_object(char **out, struct scan_results *results)
 	return 0;
 }
 
-static int json_response_parse(struct geolocation_result *result, char *response)
+static int provider_json_response_parse(struct geolocation_result *result, char *response)
 {
 	struct json_object *root_obj, *location_obj, *jobj;
 
@@ -60,7 +60,7 @@ static int json_response_parse(struct geolocation_result *result, char *response
 	json_object_put(root_obj);
 }
 
-int build_request_url(char **output, char *format_str, char *api_key)
+int provider_build_request_url(char **output, char *format_str, char *api_key)
 {
 	size_t format_str_len = strlen(format_str);
 	size_t api_key_len = strlen(api_key);
@@ -74,19 +74,19 @@ int build_request_url(char **output, char *format_str, char *api_key)
 	return 0;
 }
 
-int perform_locate(struct scan_results *results, struct geolocation_result *geolocation,
+int provider_perform_locate(struct scan_results *results, struct geolocation_result *geolocation,
 		   char *request_url)
 {
 	char *request_obj_str;
 	struct transport_result output = {};
 	int ret = 0;
 
-	build_submission_object(&request_obj_str, results);
+	provider_build_submission_object(&request_obj_str, results);
 
-	if (ret = get_file(&output, request_url, request_obj_str))
+	if (ret = transport_get_file(&output, request_url, request_obj_str))
 		goto out;
 
-	json_response_parse(geolocation, output.outbuf);
+	provider_json_response_parse(geolocation, output.outbuf);
 
 out:
 	free(output.outbuf);
@@ -115,7 +115,7 @@ char *provider_get_url(struct geolocation_provider *provider, char *url, char *a
 		if (!api_key)
 			api_key = provider->default_api_key;
 
-		build_request_url(&out, provider->url, api_key);
+		provider_build_request_url(&out, provider->url, api_key);
 	}
 
 	return out;
@@ -127,12 +127,12 @@ struct geolocation_provider providers[] = {
 	{},
 };
 
-struct geolocation_provider* get_geolocation_providers()
+struct geolocation_provider* provider_get_geolocation_providers()
 {
 	return providers;
 }
 
-struct geolocation_provider* get_geolocation_provider(char *name)
+struct geolocation_provider* provider_get_geolocation_provider(char *name)
 {
 	struct geolocation_provider *pv;
 	
@@ -144,7 +144,7 @@ struct geolocation_provider* get_geolocation_provider(char *name)
 	return NULL;
 }
 
-int start_geolocation(struct locator_config *configuration, struct geolocation_result *geo_result)
+int provider_start_geolocation(struct locator_config *configuration, struct geolocation_result *geo_result)
 {
 	struct scan_results net_results = {};
 	char *request_url;
@@ -169,7 +169,7 @@ int start_geolocation(struct locator_config *configuration, struct geolocation_r
 		goto out;
 	}
 
-	ret = perform_locate(&net_results, geo_result, request_url);
+	ret = provider_perform_locate(&net_results, geo_result, request_url);
 out:
 	if (request_url)
 		free(request_url);

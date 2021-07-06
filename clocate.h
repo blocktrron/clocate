@@ -53,15 +53,15 @@ struct locator_config {
 	char *provider_api_key;
 };
 
-int build_request_url(char **output, char *format_str, char *api_key);
+int provider_build_request_url(char **output, char *format_str, char *api_key);
 
-int perform_locate(struct scan_results *results, struct geolocation_result *geolocation,
+int provider_perform_locate(struct scan_results *results, struct geolocation_result *geolocation,
 		   char *request_url);
 
-struct geolocation_provider* get_geolocation_providers();
+struct geolocation_provider* provider_get_geolocation_providers();
 
-struct geolocation_provider* get_geolocation_provider(char *name);
+struct geolocation_provider* provider_get_geolocation_provider(char *name);
 
-int start_geolocation(struct locator_config *configuration, struct geolocation_result *geo_result);
+int provider_start_geolocation(struct locator_config *configuration, struct geolocation_result *geo_result);
 
 #endif

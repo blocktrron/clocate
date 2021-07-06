@@ -12,12 +12,7 @@ CFLAGS += $(shell pkg-config --cflags libnl-3.0)
 LDFLAGS += $(shell pkg-config --libs libnl-3.0) $(shell pkg-config --libs libnl-genl-3.0)
 endif
 
-all: clocate clocated
-
-clocated:
-ifdef DAEMON
-	$(CC) $(CFLAGS) $(LDFLAGS) -lubus -lblobmsg_json -lubox -o clocated daemon.c ubus.c nl80211.c provider.c curl.c
-endif
+all: clocate
 
 clocate:
 	$(CC) $(CFLAGS) $(LDFLAGS) -o clocate main.c nl80211.c provider.c curl.c

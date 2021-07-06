@@ -15,10 +15,10 @@ define Build/Prepare
 endef
 
 define Package/clocate
-  SECTION:=net
-  CATEGORY:=Network
+  SECTION:=utils
+  CATEGORY:=Utilities
   DEPENDS:=+libcurl +libnl-tiny +libjson-c
-  TITLE:=Location
+  TITLE:=Determine device location using neighbouring WiFi networks
 endef
 
 define Package/clocate/install

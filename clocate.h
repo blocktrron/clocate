@@ -51,6 +51,8 @@ struct locator_config {
 	struct geolocation_provider *provider;
 	char *provider_url;
 	char *provider_api_key;
+
+	bool json_output;
 };
 
 int provider_build_request_url(char **output, char *format_str, char *api_key);

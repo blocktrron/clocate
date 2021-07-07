@@ -43,7 +43,7 @@ static int provider_build_submission_object(char **out, struct scan_results *res
 	return 0;
 }
 
-static int provider_json_response_parse(struct geolocation_result *result, char *response)
+static int provider_json_response_parse(struct clocate_geolocation_result *result, char *response)
 {
 	struct json_object *root_obj, *location_obj, *jobj;
 
@@ -60,7 +60,7 @@ static int provider_json_response_parse(struct geolocation_result *result, char 
 	json_object_put(root_obj);
 }
 
-int provider_build_request_url(char **output, char *format_str, char *api_key)
+static int provider_build_request_url(char **output, char *format_str, char *api_key)
 {
 	size_t format_str_len = strlen(format_str);
 	size_t api_key_len = strlen(api_key);
@@ -74,7 +74,7 @@ int provider_build_request_url(char **output, char *format_str, char *api_key)
 	return 0;
 }
 
-int provider_perform_locate(struct scan_results *results, struct geolocation_result *geolocation,
+static int provider_perform_locate(struct scan_results *results, struct clocate_geolocation_result *geolocation,
 		   char *request_url)
 {
 	char *request_obj_str;
@@ -95,7 +95,7 @@ out:
 	return ret;
 }
 
-char *provider_get_url(struct geolocation_provider *provider, char *url, char *api_key)
+char *provider_get_url(struct clocate_geolocation_provider *provider, char *url, char *api_key)
 {
 	char *out = NULL;
 
@@ -121,20 +121,20 @@ char *provider_get_url(struct geolocation_provider *provider, char *url, char *a
 	return out;
 }
 
-struct geolocation_provider providers[] = {
+struct clocate_geolocation_provider providers[] = {
 	{.name = "mozilla", .url = MOZILLA_API_PATH, .get_url = provider_get_url, .api_key = true, .default_api_key = "test"},
 	{.name = "google", .url = GOOGLE_API_PATH, .get_url = provider_get_url, .api_key = true, .default_api_key = NULL},
 	{},
 };
 
-struct geolocation_provider* provider_get_geolocation_providers()
+struct clocate_geolocation_provider* provider_get_geolocation_providers()
 {
 	return providers;
 }
 
-struct geolocation_provider* provider_get_geolocation_provider(char *name)
+struct clocate_geolocation_provider* provider_get_geolocation_provider(char *name)
 {
-	struct geolocation_provider *pv;
+	struct clocate_geolocation_provider *pv;
 	
 	for (pv = &providers[0]; pv->name; pv++) {
 		if (!strcmp(pv->name, name))
@@ -144,7 +144,7 @@ struct geolocation_provider* provider_get_geolocation_provider(char *name)
 	return NULL;
 }
 
-int provider_start_geolocation(struct locator_config *configuration, struct geolocation_result *geo_result)
+int provider_start_geolocation(struct clocate_config *configuration, struct clocate_geolocation_result *geo_result)
 {
 	struct scan_results net_results = {};
 	char *request_url;

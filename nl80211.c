@@ -255,7 +255,7 @@ static int iface_list_result_cb(struct nl_msg *msg, void *arg) {
 	struct genlmsghdr *gnlh = nlmsg_data(nlmsg_hdr(msg));
 	struct nlattr *tb[NUM_NL80211_ATTR];
 	struct nlattr *bss[NUM_NL80211_ATTR];
-	struct if_results *results = arg;
+	struct clocate_interfaces *results = arg;
 	char *outbuf;
 	char *buf;
 
@@ -278,7 +278,7 @@ static int iface_list_result_cb(struct nl_msg *msg, void *arg) {
 	return NL_SKIP;
 }
 
-int get_wireless_interfaces(struct if_results *results)
+int get_wireless_interfaces(struct clocate_interfaces *results)
 {
 	struct nl_sock *socket = nl_socket_alloc();
 	int driver_id;

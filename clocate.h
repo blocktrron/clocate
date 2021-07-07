@@ -12,27 +12,16 @@
 #define MOZILLA_API_PATH	"https://location.services.mozilla.com/v1/geolocate?key=%s"
 #define GOOGLE_API_PATH		"https://www.googleapis.com/geolocation/v1/geolocate?key=%s"
 
-struct scan_result {
-	unsigned char bssid[6];
-	char ssid[33];
-	int signal;
-};
-
-struct scan_results {
-	int result_count;
-	struct scan_result *results;
-};
-
-struct geolocation_provider {
+struct clocate_geolocation_provider {
 	char *name;
 	char *url;
 	bool api_key;
 	char *default_api_key;
 
-	char * (*get_url)(struct geolocation_provider*, char *, char *);
+	char * (*get_url)(struct clocate_geolocation_provider*, char *, char *);
 };
 
-struct geolocation_result {
+struct clocate_geolocation_result {
 	double latitude;
 	double longitude;
 	double accuracy;
@@ -40,30 +29,25 @@ struct geolocation_result {
 	time_t timestamp;
 };
 
-struct if_results {
+struct clocate_interfaces {
 	char *buf;
 	size_t count;
 };
 
-struct locator_config {
-	struct if_results interfaces;
+struct clocate_config {
+	struct clocate_interfaces interfaces;
 
-	struct geolocation_provider *provider;
+	struct clocate_geolocation_provider *provider;
 	char *provider_url;
 	char *provider_api_key;
 
 	bool json_output;
 };
 
-int provider_build_request_url(char **output, char *format_str, char *api_key);
+struct clocate_geolocation_provider* provider_get_geolocation_providers();
 
-int provider_perform_locate(struct scan_results *results, struct geolocation_result *geolocation,
-		   char *request_url);
+struct clocate_geolocation_provider* provider_get_geolocation_provider(char *name);
 
-struct geolocation_provider* provider_get_geolocation_providers();
-
-struct geolocation_provider* provider_get_geolocation_provider(char *name);
-
-int provider_start_geolocation(struct locator_config *configuration, struct geolocation_result *geo_result);
+int provider_start_geolocation(struct clocate_config *configuration, struct clocate_geolocation_result *geo_result);
 
 #endif

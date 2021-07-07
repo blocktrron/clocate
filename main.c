@@ -14,7 +14,7 @@
 
 
 static void usage(char *path) {
-	struct geolocation_provider *providers, *p;
+	struct clocate_geolocation_provider *providers, *p;
 	printf("Usage: %s [-h] [-j] [-p provider] [-k apikey] [-i interface]\n", path);
 
 	providers = provider_get_geolocation_providers();
@@ -24,7 +24,7 @@ static void usage(char *path) {
 	
 }
 
-static void print_json(struct geolocation_result *result) {
+static void print_json(struct clocate_geolocation_result *result) {
 	struct json_object *root_obj, *ap_list;
 	size_t bufsize;
 	const char *c;
@@ -41,8 +41,8 @@ static void print_json(struct geolocation_result *result) {
 }
 
 int main(int argc, char *argv[]) {
-	struct geolocation_result geolocation_result = {};
-	struct locator_config configuration = { .json_output = false };
+	struct clocate_geolocation_result geolocation_result = {};
+	struct clocate_config configuration = { .json_output = false };
 	int ret;
 	char c;
 

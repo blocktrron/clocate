@@ -1,0 +1,14 @@
+name: clocate build
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build
+        run: make
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: clocate
+          path: clocate

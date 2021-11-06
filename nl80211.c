@@ -187,7 +187,7 @@ static int result_cb(struct nl_msg *msg, void *arg) {
 
 		char *ssid_ie = find_ie(ies, ie_size, 0);
 
-		if (ssid_ie && ssid_ie[1] < 33)
+		if (ssid_ie && ssid_ie[1] < 33 && &ssid_ie[1] + ssid_ie[1] < ies + ie_size)
 			memcpy(result->ssid, &ssid_ie[2], ssid_ie[1]);
 	}
 

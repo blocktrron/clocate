@@ -139,15 +139,16 @@ error:
 	return 0;
 }
 
+#define NEXT_IE_OFFSET(ie_buf)	(ie_buf + (uint8_t)ie_buf[1] + 2)
 static char *find_ie(char *ies, int ies_len, char tag)
 {
 	char *current_ie = ies;
 
-	while (current_ie < ies + ies_len && current_ie + current_ie[1] + 2 < ies + ies_len) {
-		if (current_ie[0] != tag)
-			continue;
-		
-		return current_ie;
+	while (current_ie < ies + ies_len && NEXT_IE_OFFSET(current_ie) <= ies + ies_len) {
+		if (current_ie[0] == tag)
+			return current_ie;
+			
+		current_ie = NEXT_IE_OFFSET(current_ie);
 	}
 
 	return NULL;

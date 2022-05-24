@@ -15,7 +15,7 @@ endif
 all: clocate
 
 clocate:
-	$(CC) $(CFLAGS) $(LDFLAGS) -o clocate main.c nl80211.c provider.c curl.c
+	$(CC) -o clocate main.c nl80211.c provider.c curl.c $(CFLAGS) $(LDFLAGS)
 
 clean:
 	rm -rf clocate clocated

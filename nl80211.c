@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <net/if.h>
 
+#include "log.h"
 #include "nl80211.h"
 
 #define RESULT_DONE	0x1
@@ -132,7 +133,7 @@ error_free:
 		nlmsg_free(ssids_to_scan);
 error:
 	if (ret < 0) {
-		fprintf(stderr, "%s: %d", __func__, ret);
+		LOG_ERR_RET(ret);
 		return ret;
 	}
 
@@ -217,7 +218,7 @@ static int get_scan_results(struct nl_sock *socket, int if_index, int driver_id,
 error:
 	nlmsg_free(msg);
 	if (ret)
-		fprintf(stderr, "%s: %d", __func__, ret);
+		LOG_ERR_RET(ret);
 	return ret;
 }
 
@@ -246,7 +247,7 @@ int perform_scan( struct scan_results *results, const char *ifname)
 
 error:
 	if (ret)
-		fprintf(stderr, "%s: %d", __func__, ret);
+		LOG_ERR_RET(ret);
 
 	nl_socket_free(socket);
 	return ret;
@@ -313,7 +314,7 @@ error:
 		nlmsg_free(msg);
 
 	if (ret < 0) {
-		fprintf(stderr, "%s: %d", __func__, ret);
+		LOG_ERR_RET(ret);
 		return ret;
 	}
 

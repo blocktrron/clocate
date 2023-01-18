@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include "log.h"
 #include "transport.h"
 
 static size_t curl_writefunc(void *ptr, size_t size, size_t nmemb, struct transport_result *s)
@@ -55,7 +56,7 @@ out:
 			curl_easy_strerror(res));
 		ret = -EINVAL;
 	} else if (http_code != 200) {
-		fprintf(stderr, "%s: %d\n", __func__, http_code);
+		LOG_ERR_RET(http_code);
 		ret = -EINVAL;
 	}
 

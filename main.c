@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (!configuration.provider)
-		configuration.provider = provider_get_geolocation_provider("mozilla");
+		configuration.provider = provider_get_geolocation_provider("beacondb");
 
 	if (configuration.provider->api_key && !configuration.provider->default_api_key &&
 	    !configuration.provider_api_key) {

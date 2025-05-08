@@ -9,6 +9,7 @@
 #define 	MACSTR   "%02x:%02x:%02x:%02x:%02x:%02x"
 
 
+#define BEACONDB_API_PATH	"https://api.beacondb.net/v1/geolocate"
 #define MOZILLA_API_PATH	"https://location.services.mozilla.com/v1/geolocate?key=%s"
 #define GOOGLE_API_PATH		"https://www.googleapis.com/geolocation/v1/geolocate?key=%s"
 

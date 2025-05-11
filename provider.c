@@ -125,6 +125,7 @@ struct clocate_geolocation_provider providers[] = {
 	{.name = "beacondb", .url = BEACONDB_API_PATH, .get_url = provider_get_url, .api_key = false, .default_api_key = NULL},
 	{.name = "mozilla", .url = MOZILLA_API_PATH, .get_url = provider_get_url, .api_key = true, .default_api_key = "test"},
 	{.name = "google", .url = GOOGLE_API_PATH, .get_url = provider_get_url, .api_key = true, .default_api_key = NULL},
+	{.name = "positon", .url = POSITON_API_PATH, .get_url = provider_get_url, .api_key = true, .default_api_key = "test"},
 	{},
 };
 

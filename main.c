@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 	struct clocate_geolocation_result geolocation_result = {};
 	struct clocate_config configuration = { .json_output = false };
 	int ret;
-	char c;
+	int c;
 
 	while ((c = getopt (argc, argv, "hjvi:k:p:")) != -1) {
 		switch(c) {

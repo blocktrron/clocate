@@ -50,6 +50,7 @@ int transport_get_file(struct transport_result *output, char *url, char *post_da
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_writefunc);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, output);
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, "clocate/0.1");
 
 	res = curl_easy_perform(curl);
 	curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &http_code);

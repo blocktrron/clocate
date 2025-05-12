@@ -14,13 +14,12 @@
 
 static void usage(char *path) {
 	struct clocate_geolocation_provider *providers, *p;
-	printf("Usage: %s [-h] [-j] [-p provider] [-k apikey] [-i interface]\n", path);
+	printf("Usage: %s [-h] [-j] [-v] [-p provider] [-k apikey] [-i interface]\n", path);
 
 	providers = provider_get_geolocation_providers();
 	printf("Available providers:\n");
 	for (p = providers; p->name; p++)
 		printf(" %s\n", p->name);
-	
 }
 
 static void print_json(struct clocate_geolocation_result *result) {
@@ -45,13 +44,17 @@ int main(int argc, char *argv[]) {
 	int ret;
 	char c;
 
-	while ((c = getopt (argc, argv, "hji:k:p:")) != -1) {
+	while ((c = getopt (argc, argv, "hjvi:k:p:")) != -1) {
 		switch(c) {
 			case 'h':
 				usage(argv[0]);
 				exit(0);
 			case 'j':
 				configuration.json_output = true;
+				break;
+			case 'v':
+				configuration.debug_output = true;
+				fprintf(stderr, "Debug: Debug Messages enabled\n");
 				break;
 			case 'i':
 				if(strlen(optarg) > IF_NAMESIZE - 1) {
@@ -69,11 +72,24 @@ int main(int argc, char *argv[]) {
 			case 'k':
 				configuration.provider_api_key = optarg;
 				break;
+			default:
+				exit(2);
 		}
 	}
 
-	if (!configuration.interfaces.buf)
+	if (configuration.debug_output)
+		fprintf(stderr, "Debug: options read in done\n");
+
+	if (!configuration.interfaces.buf) {
+		if (configuration.debug_output)
+			fprintf(stderr, "Debug: no explicit interface defined, using all\n");
 		get_wireless_interfaces(&configuration.interfaces);
+		if (configuration.debug_output)
+			fprintf(stderr, "Debug: finished getting interfaces\n");
+	}
+
+	if (configuration.debug_output)
+		fprintf(stderr, "Debug: Interfaces count: %zu\n", configuration.interfaces.count ? configuration.interfaces.count : 0);
 
 	if (configuration.interfaces.count == 0) {
 		fprintf(stderr, "No wireless interfaces available\n");
@@ -83,11 +99,17 @@ int main(int argc, char *argv[]) {
 	if (!configuration.provider)
 		configuration.provider = provider_get_geolocation_provider("beacondb");
 
+	if (configuration.debug_output)
+		fprintf(stderr, "Debug: Provider: %s\n", configuration.provider ? configuration.provider->name : "none");
+
 	if (configuration.provider->api_key && !configuration.provider->default_api_key &&
 	    !configuration.provider_api_key) {
 		usage(argv[0]);
 		exit(1);
 	}
+
+	if (configuration.provider->api_key && configuration.debug_output)
+		fprintf(stderr, "Debug: API-Key: %s\n", configuration.provider_api_key ? configuration.provider_api_key : "none");
 
 	if (ret = provider_start_geolocation(&configuration, &geolocation_result))
 		goto out;

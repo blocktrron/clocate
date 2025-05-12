@@ -44,6 +44,7 @@ struct clocate_config {
 	char *provider_api_key;
 
 	bool json_output;
+	bool debug_output;
 };
 
 struct clocate_geolocation_provider* provider_get_geolocation_providers();

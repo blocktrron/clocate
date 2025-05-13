@@ -75,7 +75,7 @@ static int provider_build_request_url(char **output, char *format_str, char *api
 }
 
 static int provider_perform_locate(struct scan_results *results, struct clocate_geolocation_result *geolocation,
-		   char *request_url)
+		   char *request_url, bool debug_output)
 {
 	char *request_obj_str;
 	struct transport_result output = {};
@@ -83,8 +83,14 @@ static int provider_perform_locate(struct scan_results *results, struct clocate_
 
 	provider_build_submission_object(&request_obj_str, results);
 
-	if (ret = transport_get_file(&output, request_url, request_obj_str))
+	if (debug_output)
+		fprintf(stderr, "Debug: JSON: %s\n", request_obj_str);
+
+	if (ret = transport_get_file(&output, request_url, request_obj_str, debug_output))
 		goto out;
+
+	if (debug_output)
+		fprintf(stderr, "Debug: Response: %s\n", output.outbuf ? output.outbuf : "none");
 
 	provider_json_response_parse(geolocation, output.outbuf);
 
@@ -125,6 +131,7 @@ struct clocate_geolocation_provider providers[] = {
 	{.name = "beacondb", .url = BEACONDB_API_PATH, .get_url = provider_get_url, .api_key = false, .default_api_key = NULL},
 	{.name = "mozilla", .url = MOZILLA_API_PATH, .get_url = provider_get_url, .api_key = true, .default_api_key = "test"},
 	{.name = "google", .url = GOOGLE_API_PATH, .get_url = provider_get_url, .api_key = true, .default_api_key = NULL},
+	{.name = "positon", .url = POSITON_API_PATH, .get_url = provider_get_url, .api_key = true, .default_api_key = "test"},
 	{},
 };
 
@@ -158,11 +165,20 @@ int provider_start_geolocation(struct clocate_config *configuration, struct cloc
 	if (!request_url)
 		return -EINVAL;
 
+	if (configuration->debug_output)
+		fprintf(stderr, "Debug: URL: %s\n", request_url ? request_url : "none");
+
 	for (int i = 0; i < configuration->interfaces.count; i++) {
 		iface = &configuration->interfaces.buf[i * IF_NAMESIZE];
+
+		if (configuration->debug_output)
+            fprintf(stderr, "Debug: Scanning interface: %s\n", iface);
+
 		ret = perform_scan(&net_results, iface);
 		if (ret)
 			fprintf(stderr, "Scan failed on interface %s\n", iface);
+		else if (configuration->debug_output)
+            fprintf(stderr, "Debug: Done Scanning interface: %s\n", iface);
 	}
 
 	if (net_results.result_count == 0) {
@@ -170,7 +186,10 @@ int provider_start_geolocation(struct clocate_config *configuration, struct cloc
 		goto out;
 	}
 
-	ret = provider_perform_locate(&net_results, geo_result, request_url);
+	if (configuration->debug_output)
+		fprintf(stderr, "Debug: Result Count: %d\n", net_results.result_count);
+
+	ret = provider_perform_locate(&net_results, geo_result, request_url, configuration->debug_output);
 out:
 	if (request_url)
 		free(request_url);

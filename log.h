@@ -3,6 +3,6 @@
 
 #include <stdio.h>
 
-#define LOG_ERR_RET(_ret)   fprintf(stderr, "%s: %d\n", __func__, _ret);
+#define LOG_ERR_RET(_ret)   fprintf(stderr, "%s: %ld\n", __func__, (long)(_ret));
 
 #endif

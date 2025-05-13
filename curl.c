@@ -23,7 +23,7 @@ static size_t curl_writefunc(void *ptr, size_t size, size_t nmemb, struct transp
 	return receiving_size;
 }
 
-int transport_get_file(struct transport_result *output, char *url, char *post_data)
+int transport_get_file(struct transport_result *output, char *url, char *post_data, bool debug_output)
 {
 	struct curl_slist *list = NULL;
 	CURLcode res = 0;
@@ -39,13 +39,18 @@ int transport_get_file(struct transport_result *output, char *url, char *post_da
 		goto out;
 	}
 
+	if (debug_output)
+		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+
 	curl_easy_setopt(curl, CURLOPT_URL, url);
+	curl_easy_setopt(curl, CURLOPT_POST, 1L);
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
 
 	list = curl_slist_append(list, "Content-Type: application/json");
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_writefunc);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, output);
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, "clocate/0.1");
 
 	res = curl_easy_perform(curl);
 	curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &http_code);

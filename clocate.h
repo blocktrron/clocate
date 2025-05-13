@@ -12,6 +12,7 @@
 #define BEACONDB_API_PATH	"https://api.beacondb.net/v1/geolocate"
 #define MOZILLA_API_PATH	"https://location.services.mozilla.com/v1/geolocate?key=%s"
 #define GOOGLE_API_PATH		"https://www.googleapis.com/geolocation/v1/geolocate?key=%s"
+#define POSITON_API_PATH	"https://api.positon.xyz/v1/geolocate?key=%s"
 
 struct clocate_geolocation_provider {
 	char *name;
@@ -43,6 +44,7 @@ struct clocate_config {
 	char *provider_api_key;
 
 	bool json_output;
+	bool debug_output;
 };
 
 struct clocate_geolocation_provider* provider_get_geolocation_providers();
